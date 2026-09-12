@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger — Scholarship Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:rgb(29, 30, 27) ; --parchment:#F6F1E4; --forest:#2F5233; --gold:#C9A227;
+    --stamp:#8B2E2E; --slate:#2B2B26; --line: rgba(43,43,38,0.18); --radius:3px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--parchment);color:var(--slate);font-family:'Work Sans',sans-serif;line-height:1.5;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:1000;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 32px;}
+  button{font-family:inherit;}
+ 
+  header.letterhead{
+  border-bottom:2px solid var(--ink);
+  background:var(--parchment);
+}
+  .letterhead .bar{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:16px 0;
+  gap:10px;
+}
+  .brand{display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .brand .mark{width:34px;height:34px;border:2px solid var(--forest);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;color:var(--forest);font-size:15px;}
+  .brand-text{font-family:'Fraunces',serif;font-weight:1000;font-size:80px;text-align:center}
+  .brand-text span{color:var(--forest);}
+  nav.top-nav{display:flex;gap:26px;font-size:14px;font-weight:500;align-items:center;}
+  nav.top-nav a{text-decoration:none;padding-bottom:3px;border-bottom:1px solid transparent;cursor:pointer;}
+  nav.top-nav a:hover, nav.top-nav a.active{border-color:var(--forest);color:var(--forest);}
+  .nav-actions{display:flex;gap:10px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:10px 18px;border-radius:var(--radius);cursor:pointer;border:1.5px solid var(--ink);text-decoration:none;transition:transform .12s,background .15s;background:none;}
+  .btn-primary{background:var(--forest);border-color:var(--forest);color:var(--parchment);}
+  .btn-primary:hover{transform:translateY(-1px);background:#274429;}
+  .btn-ghost{background:transparent;color:var(--ink);}
+  .btn-ghost:hover{background:rgba(22,36,28,0.05);}
+  .btn-sm{padding:8px 14px;font-size:13px;}
+  .user-chip{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600;}
+  .user-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--forest);}
+ 
+  .breadcrumb{background:var(--ink);color:rgba(246,241,228,0.75);font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:0.04em;padding:15px 0;}
+  .breadcrumb .wrap{display:flex;gap:8px;}
+  .breadcrumb a{cursor:pointer;text-decoration:none;color:rgba(246,241,228,0.75);}
+  .breadcrumb a:hover, .breadcrumb .current{color:var(--gold);}
+ 
+  main{min-height:60vh;}
+  .page{display:none;padding:56px 0;animation:fade .25s ease;}
+  .page.visible{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+ 
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--forest);margin-bottom:16px;display:inline-block;}
+ 
+  .hero .grid{display:grid;grid-template-columns:1.3fr 1fr;gap:56px;align-items:end;}
+  .hero h1{font-size:clamp(36px,5vw,58px);line-height:1.05;margin-bottom:18px;}
+  .hero h1 em{font-style:italic;color:var(--forest);}
+  .hero p.lede{font-size:16.5px;max-width:46ch;color:#4a4a3e;margin-bottom:26px;}
+  .ledger-card{background:#fffdf7;border:1px solid var(--line);border-radius:var(--radius);padding:24px 24px 18px;position:relative;box-shadow:3px 3px 0 rgba(22,36,28,0.08);}
+  .ledger-card::before{
+  content:"REGISTRY";
+  position:absolute;
+  top:-35px;
+  left:0;
+  background:transparent;
+  padding:0;
+  font-family:'Fraunces',serif;
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:0.02em;
+  color:var(--forest);
+}
+  .ledger-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px;}
+  .ledger-row:last-child{border-bottom:none;}
+  .ledger-row .val{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink);}
+ 
+  .quicklinks{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:52px;}
+  .qcard{border:1px solid var(--line);background:#fffdf7;border-radius:var(--radius);padding:20px;cursor:pointer;transition:transform .12s, border-color .15s;}
+  .qcard:hover{transform:translateY(-2px);border-color:var(--forest);}
+  .qcard .qnum{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--forest);margin-bottom:8px;}
+  .qcard h3{font-size:16px;margin-bottom:6px;}
+  .qcard p{font-size:13px;color:#6b6b5c;}
+ 
+  .notice-strip{border-top:1px solid var(--ink);border-bottom:1px solid var(--line);margin-top:56px;padding:18px 0;display:flex;gap:14px;align-items:center;}
+  .notice-strip .tag{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--stamp);border:1.5px solid var(--stamp);padding:3px 9px;border-radius:2px;white-space:nowrap;}
+  .notice-strip .ticker{font-size:13.5px;color:var(--slate);overflow:hidden;white-space:nowrap;}
+ 
+  .auth-shell{max-width:440px;margin:0 auto;}
+  .auth-card{background:#fffdf7;border:1px solid var(--line);border-radius:var(--radius);padding:38px 34px;box-shadow:3px 3px 0 rgba(22,36,28,0.08);}
+  .auth-card h2{font-size:26px;margin-bottom:6px;}
+  .auth-card p.sub{font-size:14px;color:#6b6b5c;margin-bottom:28px;}
+  .field-group{margin-bottom:20px;}
+  .field-group label{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--forest);margin-bottom:8px;}
+  .field-group input, .field-group select, .field-group textarea{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--line);color:var(--slate);font-family:'Work Sans',sans-serif;font-size:15px;padding:8px 2px;outline:none;transition:border-color .15s;}
+  .field-group input:focus, .field-group select:focus, .field-group textarea:focus{border-color:var(--forest);}
+  .field-group textarea{resize:vertical;min-height:90px;}
+  .error-msg{font-size:12px;color:var(--stamp);margin-top:6px;display:none;font-family:'JetBrains Mono',monospace;}
+  .field-group.invalid input, .field-group.invalid select{border-color:var(--stamp);}
+  .field-group.invalid .error-msg{display:block;}
+  .auth-foot{margin-top:22px;font-size:13.5px;color:#6b6b5c;}
+  .auth-foot a{color:var(--forest);font-weight:600;cursor:pointer;text-decoration:underline;}
+  #loginStatus, #registerStatus{margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--stamp);display:none;}
+  #loginStatus.ok, #registerStatus.ok{color:var(--forest);}
+ 
+  .stepper{display:flex;gap:0;margin-bottom:44px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);}
+  .step{flex:1;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:#8a8a78;border-right:1px solid var(--line);position:relative;}
+  .step:last-child{border-right:none;}
+  .step.active{color:var(--ink);background:rgba(47,82,51,0.07);}
+  .step.done{color:var(--forest);}
+  .step .stepnum{display:block;font-size:16px;font-family:'Fraunces',serif;font-weight:600;margin-bottom:4px;}
+  .step-panel{display:none;}
+  .step-panel.visible{display:block;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .step-actions{display:flex;justify-content:space-between;margin-top:32px;}
+  .review-block{border:1px dashed var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+  .review-row{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;border-bottom:1px dashed var(--line);}
+  .review-row:last-child{border-bottom:none;}
+  .review-row .k{color:#6b6b5c;}
+  #applySubmitStatus{margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--forest);display:none;}
+ 
+  .track-form{display:flex;gap:12px;max-width:520px;margin-bottom:36px;}
+  .track-form input{flex:1;border:1.5px solid var(--line);border-radius:var(--radius);padding:12px 14px;font-size:15px;font-family:'JetBrains Mono',monospace;outline:none;background:#fffdf7;}
+  .track-form input:focus{border-color:var(--forest);}
+  .track-result{border:1px solid var(--line);border-radius:var(--radius);background:#fffdf7;padding:26px;max-width:560px;display:none;}
+  .track-result.visible{display:block;}
+  .status-badge{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:4px 11px;border-radius:2px;display:inline-block;margin-bottom:14px;}
+  .status-badge.pending{color:var(--gold);border:1.5px solid var(--gold);background:rgba(201,162,39,0.08);}
+  .status-badge.review{color:#4a6fa5;border:1.5px solid #4a6fa5;background:rgba(74,111,165,0.08);}
+  .status-badge.approved{color:var(--forest);border:1.5px solid var(--forest);background:rgba(47,82,51,0.08);}
+  .track-timeline{margin-top:16px;}
+  .tl-item{display:flex;gap:12px;padding:9px 0;font-size:13.5px;}
+  .tl-item .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--forest);margin-top:5px;flex-shrink:0;}
+  .tl-item.pending .tl-dot{background:var(--line);}
+  .tl-item .tl-date{color:#6b6b5c;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+ 
+  .notice-list{border-top:1px solid var(--ink);}
+  .notice-row{display:grid;grid-template-columns:110px 1fr auto;gap:18px;align-items:center;padding:18px 4px;border-bottom:1px solid var(--line);}
+  .notice-row .ndate{font-family:'JetBrains Mono',monospace;font-size:12px;color:#6b6b5c;}
+  .notice-row .ntitle{font-size:15px;font-weight:500;}
+  .notice-row .stamp{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--stamp);border:1.5px solid var(--stamp);padding:3px 8px;border-radius:2px;transform:rotate(-2deg);white-space:nowrap;}
+  .notice-row .stamp.gold{color:var(--gold);border-color:var(--gold);transform:rotate(1.5deg);}
+ 
+  footer{border-top:2px solid var(--ink);padding:30px 0;margin-top:40px;}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:#6b6b5c;}
+ 
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  :focus-visible{outline:2px solid var(--forest);outline-offset:2px;}
+  .scholarship-banner {
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+}
+.scholarship-banner {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+}
+
+.scholarship-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.prev,
+.next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    font-size: 25px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.prev {
+    left: 20px;
+}
+
+.next {
+    right: 20px;
+}
+
+.slider-dots {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    letter-spacing: 8px;
+    cursor: pointer;
+} 
+  @media (max-width:820px){
+    .hero .grid{grid-template-columns:1fr;}
+    .quicklinks{grid-template-columns:1fr 1fr;}
+    nav.top-nav{display:none;}
+    .field-row{grid-template-columns:1fr;}
+    .notice-row{grid-template-columns:1fr;row-gap:6px;}
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;transition:none !important;} }
+</style>
+</head>
+<body>
+ 
+<header class="letterhead">
+  <div class="wrap bar">
+    <div class="brand" data-nav="home">
+      
+      <div class="brand-text"> <span>EDUBRIDGE </span></div>
+    </div>
+    <nav class="top-nav" id="topNav">
+      <a data-nav="home">Home</a>
+      <a data-nav="apply">New Application</a>
+      <a data-nav="track">Track Status</a>
+      <a data-nav="notices">Notices</a>
+    </nav>
+    <div class="scholarship-banner">
+      <div class="scholarship-banner">
+
+    <img id="sliderImage"
+         src="https://www.euroschoolindia.com/blogs/wp-content/uploads/2023/06/types-of-scholarship-for-students.jpg"
+         alt="Scholarship">
+
+    <button class="prev" onclick="prevSlide()">❮</button>
+    <button class="next" onclick="nextSlide()">❯</button>
+
+    <div class="slider-dots">
+        <span onclick="showSlide(0)">●</span>
+        <span onclick="showSlide(1)">●</span>
+        <span onclick="showSlide(2)">●</span>
+    </div>
+
+</div>
+</div>
+    <div class="nav-actions" id="navActions">
+      <a class="btn btn-ghost btn-sm" data-nav="login">Log in</a>
+      <a class="btn btn-primary btn-sm" data-nav="register">Register</a>
+    </div>
+  </div>
+</header>
+ 
+<div class="breadcrumb"><div class="wrap"><a data-nav="home">Portal</a><span>/</span><span class="current" id="crumbCurrent">Home</span></div></div>
+ 
+<main>
+ 
+  <!-- HOME -->
+  <section class="page" id="page-home">
+    <div class="wrap">
+      <div class="hero">
+        <div class="grid">
+          <div>
+            <h1>Fund your <em>next chapter</em>,<br>one entry at a time.</h1>
+            <p class="lede">A single registry for scholarships, applications, and status tracking — verified listings, one login, no repeated paperwork.</p>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <a class="btn btn-primary" data-nav="apply">Start new application →</a>
+              <a class="btn btn-ghost" data-nav="track">Track existing application</a>
+            </div>
+          </div>
+          <div class="ledger-card">
+            <div class="ledger-row"><span>Scholarships listed</span><span class="val">128</span></div>
+            <div class="ledger-row"><span>Applications this month</span><span class="val">3,402</span></div>
+            <div class="ledger-row"><span>Avg. processing time</span><span class="val">14 days</span></div>
+            <div class="ledger-row"><span>Helpdesk response</span><span class="val">&lt; 24 hrs</span></div>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="quicklinks">
+        <div class="qcard" data-nav="register"><div class="qnum">01</div><h3>New Applicant</h3><p>Register with basic details to begin.</p></div>
+        <div class="qcard" data-nav="login"><div class="qnum">02</div><h3>Returning User</h3><p>Log in to resume a saved application.</p></div>
+        <div class="qcard" data-nav="apply"><div class="qnum">03</div><h3>Apply Now</h3><p>Fill the four-step application form.</p></div>
+        <div class="qcard" data-nav="track"><div class="qnum">04</div><h3>Track Status</h3><p>Check your application by reference ID.</p></div>
+      </div>
+ 
+      <div class="notice-strip">
+        <span class="tag">Notice</span>
+        <span class="ticker">Applications for the Horizon STEM Fellowship close in 22 days — submit documents before the deadline to avoid rejection.</span>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- LOGIN -->
+  <section class="page" id="page-login">
+    <div class="wrap auth-shell">
+      <div class="auth-card">
+        <h2>Log in</h2>
+        <p class="sub">Access your saved applications and track status.</p>
+        <form id="loginForm" novalidate>
+          <div class="field-group" data-field="loginEmail">
+            <label for="loginEmail">Registered email</label>
+            <input type="email" id="loginEmail" placeholder="jordan@email.com">
+            <div class="error-msg">Enter a valid email address.</div>
+          </div>
+          <div class="field-group" data-field="loginPassword">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••">
+            <div class="error-msg">Password must be at least 6 characters.</div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Log in</button>
+          <div id="loginStatus"></div>
+        </form>
+        <div class="auth-foot">New here? <a data-nav="register">Create an account</a></div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- REGISTER -->
+  <section class="page" id="page-register">
+    <div class="wrap auth-shell">
+      <div class="auth-card">
+        <h2>Register</h2>
+        <p class="sub">Create your applicant record. Takes about two minutes.</p>
+        <form id="registerForm" novalidate>
+          <div class="field-group" data-field="regName">
+            <label for="regName">Full name</label>
+            <input type="text" id="regName" placeholder="Jordan Ellis">
+            <div class="error-msg">Please enter your full name.</div>
+          </div>
+          <div class="field-group" data-field="regEmail">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" placeholder="jordan@email.com">
+            <div class="error-msg">Enter a valid email address.</div>
+          </div>
+          <div class="field-group" data-field="regPassword">
+            <label for="regPassword">Create password</label>
+            <input type="password" id="regPassword" placeholder="At least 6 characters">
+            <div class="error-msg">Password must be at least 6 characters.</div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Create account</button>
+          <div id="registerStatus"></div>
+        </form>
+        <div class="auth-foot">Already registered? <a data-nav="login">Log in</a></div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- APPLY (multi-step) -->
+  <section class="page" id="page-apply">
+    <div class="wrap">
+      <span class="eyebrow">New Application</span>
+      <h2 style="font-size:30px;margin-bottom:30px;">Scholarship application form</h2>
+ 
+      <div class="stepper" id="stepper">
+        <div class="step active" data-step="1"><span class="stepnum">01</span>Personal Details</div>
+        <div class="step" data-step="2"><span class="stepnum">02</span>Academic Details</div>
+        <div class="step" data-step="3"><span class="stepnum">03</span>Documents</div>
+        <div class="step" data-step="4"><span class="stepnum">04</span>Review &amp; Submit</div>
+      </div>
+ 
+      <form id="applyForm" novalidate>
+        <div class="step-panel visible" data-panel="1">
+          <div class="field-row">
+            <div class="field-group" data-field="apFullName">
+              <label for="apFullName">Full name</label>
+              <input type="text" id="apFullName" placeholder="Jordan Ellis">
+              <div class="error-msg">Please enter your full name.</div>
+            </div>
+            <div class="field-group" data-field="apDob">
+              <label for="apDob">Date of birth</label>
+              <input type="date" id="apDob">
+              <div class="error-msg">Please enter your date of birth.</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group" data-field="apEmail">
+              <label for="apEmail">Email</label>
+              <input type="email" id="apEmail" placeholder="jordan@email.com">
+              <div class="error-msg">Enter a valid email address.</div>
+            </div>
+            <div class="field-group" data-field="apPhone">
+              <label for="apPhone">Phone number</label>
+              <input type="tel" id="apPhone" placeholder="10-digit number">
+              <div class="error-msg">Enter a valid 10-digit phone number.</div>
+            </div>
+          </div>
+        </div>
+ 
+        <div class="step-panel" data-panel="2">
+          <div class="field-row">
+            <div class="field-group" data-field="apLevel">
+              <label for="apLevel">Education level</label>
+              <select id="apLevel">
+                <option value="">Select one</option>
+                <option>High school senior</option>
+                <option>Undergraduate</option>
+                <option>Graduate</option>
+              </select>
+              <div class="error-msg">Please select your education level.</div>
+            </div>
+            <div class="field-group" data-field="apInstitution">
+              <label for="apInstitution">Institution name</label>
+              <input type="text" id="apInstitution" placeholder="Your school or university">
+              <div class="error-msg">Please enter your institution.</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group" data-field="apGpa">
+              <label for="apGpa">GPA / Percentage</label>
+              <input type="text" id="apGpa" placeholder="e.g. 3.8 or 85%">
+              <div class="error-msg">Please enter your GPA or percentage.</div>
+            </div>
+            <div class="field-group" data-field="apField">
+              <label for="apField">Field of study</label>
+              <select id="apField">
+                <option value="">Select one</option>
+                <option>Engineering</option>
+                <option>Arts</option>
+                <option>Business</option>
+                <option>Community Service</option>
+              </select>
+              <div class="error-msg">Please select a field of study.</div>
+            </div>
+          </div>
+        </div>
+ 
+        <div class="step-panel" data-panel="3">
+          <div class="field-group" data-field="apEssay">
+            <label for="apEssay">Personal statement</label>
+            <textarea id="apEssay" placeholder="Tell us what this scholarship would make possible for you (min. 50 characters)..."></textarea>
+            <div class="error-msg">Please write at least 50 characters.</div>
+          </div>
+          <div class="field-group" data-field="apDoc">
+            <label for="apDoc">Supporting document (transcript or ID)</label>
+            <input type="file" id="apDoc">
+            <div class="error-msg">Please attach a document.</div>
+          </div>
+        </div>
+ 
+        <div class="step-panel" data-panel="4">
+          <div class="review-block" id="reviewBlock"></div>
+          <p style="font-size:13px;color:#6b6b5c;">By submitting, you confirm the details above are accurate to the best of your knowledge.</p>
+          <div id="applySubmitStatus"></div>
+        </div>
+ 
+        <div class="step-actions">
+          <button type="button" class="btn btn-ghost" id="prevStepBtn" disabled>← Back</button>
+          <button type="button" class="btn btn-primary" id="nextStepBtn">Continue →</button>
+          <button type="submit" class="btn btn-primary" id="submitAppBtn" style="display:none;">Submit application</button>
+        </div>
+      </form>
+    </div>
+  </section>
+ 
+  <section class="page" id="page-track">
+    <div class="wrap">
+      <span class="eyebrow">Application Status</span>
+      <h2 style="font-size:30px;margin-bottom:26px;">Track your application</h2>
+      <form class="track-form" id="trackForm">
+        <input type="text" id="trackId" placeholder="Enter reference ID e.g. LG-2026-00417">
+        <button type="submit" class="btn btn-primary">Track</button>
+      </form>
+      <div class="track-result" id="trackResult"></div>
+    </div>
+  </section>
+ 
+  <!-- NOTICES -->
+  <section class="page" id="page-notices">
+    <div class="wrap">
+      <span class="eyebrow">Announcements</span>
+      <h2 style="font-size:30px;margin-bottom:26px;">Notices &amp; updates</h2>
+      <div class="notice-list" id="noticeList"></div>
+    </div>
+  </section>
+ 
+</main>
+ 
+<footer>
+  <div class="wrap">
+    <span>© 2026 Ledger Registry — a directory, not a lender.</span>
+    <span>Entries verified manually before listing.</span>
+  </div>
+</footer>
+ 
+<script>
+  /* ---------------- Router ---------------- */
+
+const images = [
+    "https://www.euroschoolindia.com/blogs/wp-content/uploads/2023/06/types-of-scholarship-for-students.jpg",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2IG7ldVLNT6xUcbNcPLh2kgh6-Nalrqka1012-0_RqZ0W65B9jnRjM3M&s=10",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQonxqfXH-_uAcblFs_N_xnTTfk3cLPeMKpeZOmaXuUzfOeZELfZ4Cz794&s=10"
+];
+
+let currentSlide = 0;
+
+function showSlide(index) {
+    currentSlide = index;
+
+    document.getElementById("sliderImage").src =
+        images[currentSlide];
+}
+
+function nextSlide() {
+    currentSlide++;
+
+    if (currentSlide >= images.length) {
+        currentSlide = 0;
+    }
+
+    showSlide(currentSlide);
+}
+
+function prevSlide() {
+    currentSlide--;
+
+    if (currentSlide < 0) {
+        currentSlide = images.length - 1;
+    }
+
+    showSlide(currentSlide);
+}
+
+  const pages = ['home','login','register','apply','track','notices'];
+  const crumbLabels = {home:'Home',login:'Log in',register:'Register',apply:'New Application',track:'Track Status',notices:'Notices'};
+ 
+  function navigate(name){
+    if(!pages.includes(name)) name = 'home';
+    location.hash = '#/' + name;
+  }
+ 
+  function render(){
+    let name = (location.hash.replace('#/','') || 'home').split('?')[0];
+    if(!pages.includes(name)) name = 'home';
+ 
+    pages.forEach(p => {
+      document.getElementById('page-' + p).classList.toggle('visible', p === name);
+    });
+    document.querySelectorAll('#topNav a').forEach(a => {
+      a.classList.toggle('active', a.dataset.nav === name);
+    });
+    document.getElementById('crumbCurrent').textContent = crumbLabels[name];
+    window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
+ 
+    // nav actions reflect mock auth state
+    document.getElementById('navActions').style.display = (name==='login'||name==='register') ? 'none' : 'flex';
+  }
+ 
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-nav]');
+    if(el){ e.preventDefault(); navigate(el.dataset.nav); }
+  });
+  window.addEventListener('hashchange', render);
+  render();
+ 
+  /* ---------------- Login form ---------------- */
+  const loginForm = document.getElementById('loginForm');
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const passOk = pass.length >= 6;
+    toggleInvalid('loginEmail', !emailOk);
+    toggleInvalid('loginPassword', !passOk);
+    const status = document.getElementById('loginStatus');
+    if(emailOk && passOk){
+      status.textContent = '✓ Logged in — redirecting to your dashboard...';
+      status.classList.add('ok'); status.style.display='block';
+      setTimeout(()=>navigate('apply'), 700);
+    } else {
+      status.textContent = 'Please fix the highlighted fields.';
+      status.classList.remove('ok'); status.style.display='block';
+    }
+  });
+ 
+  /* ---------------- Register form ---------------- */
+  const registerForm = document.getElementById('registerForm');
+  registerForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPassword').value;
+    const nameOk = name.length >= 2;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const passOk = pass.length >= 6;
+    toggleInvalid('regName', !nameOk);
+    toggleInvalid('regEmail', !emailOk);
+    toggleInvalid('regPassword', !passOk);
+    const status = document.getElementById('registerStatus');
+    if(nameOk && emailOk && passOk){
+      status.textContent = '✓ Account created — please log in to continue.';
+      status.classList.add('ok'); status.style.display='block';
+      setTimeout(()=>navigate('login'), 700);
+    } else {
+      status.textContent = 'Please fix the highlighted fields.';
+      status.classList.remove('ok'); status.style.display='block';
+    }
+  });
+ 
+  function toggleInvalid(id, invalid){
+    document.querySelector(`[data-field="${id}"]`).classList.toggle('invalid', invalid);
+  }
+ 
+  /* ---------------- Multi-step application ---------------- */
+  let currentStep = 1;
+  const totalSteps = 4;
+  const stepFields = {
+    1: ['apFullName','apDob','apEmail','apPhone'],
+    2: ['apLevel','apInstitution','apGpa','apField'],
+    3: ['apEssay','apDoc'],
+  };
+ 
+  function validateStep(step){
+    let ok = true;
+    (stepFields[step] || []).forEach(id => {
+      const el = document.getElementById(id);
+      let fieldOk = true;
+      if(id === 'apEmail') fieldOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+      else if(id === 'apPhone') fieldOk = /^\d{10}$/.test(el.value.trim());
+      else if(id === 'apEssay') fieldOk = el.value.trim().length >= 50;
+      else if(id === 'apDoc') fieldOk = el.files && el.files.length > 0;
+      else fieldOk = el.value.trim().length > 0;
+      toggleInvalid(id, !fieldOk);
+      if(!fieldOk) ok = false;
+    });
+    return ok;
+  }
+ 
+  function goToStep(step){
+    currentStep = step;
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.toggle('visible', +p.dataset.panel === step));
+    document.querySelectorAll('.step').forEach(s => {
+      const n = +s.dataset.step;
+      s.classList.toggle('active', n === step);
+      s.classList.toggle('done', n < step);
+    });
+    document.getElementById('prevStepBtn').disabled = step === 1;
+    document.getElementById('nextStepBtn').style.display = step === totalSteps ? 'none' : 'inline-flex';
+    document.getElementById('submitAppBtn').style.display = step === totalSteps ? 'inline-flex' : 'none';
+    if(step === totalSteps) buildReview();
+  }
+ 
+  function buildReview(){
+    const val = id => document.getElementById(id).value;
+    const rows = [
+      ['Full name', val('apFullName')],
+      ['Date of birth', val('apDob')],
+      ['Email', val('apEmail')],
+      ['Phone', val('apPhone')],
+      ['Education level', val('apLevel')],
+      ['Institution', val('apInstitution')],
+      ['GPA / Percentage', val('apGpa')],
+      ['Field of study', val('apField')],
+    ];
+    document.getElementById('reviewBlock').innerHTML = rows.map(([k,v]) =>
+      `<div class="review-row"><span class="k">${k}</span><span>${v || '—'}</span></div>`
+    ).join('');
+  }
+ 
+  document.getElementById('nextStepBtn').addEventListener('click', () => {
+    if(validateStep(currentStep) && currentStep < totalSteps) goToStep(currentStep + 1);
+  });
+  document.getElementById('prevStepBtn').addEventListener('click', () => {
+    if(currentStep > 1) goToStep(currentStep - 1);
+  });
+ 
+  document.getElementById('applyForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const refId = 'LG-2026-' + String(Math.floor(Math.random()*90000)+10000);
+    const status = document.getElementById('applySubmitStatus');
+    status.textContent = `✓ Application submitted. Your reference ID is ${refId} — save it to track status.`;
+    status.style.display = 'block';
+  });
+ 
+  /* ---------------- Track status ---------------- */
+  document.getElementById('trackForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('trackId').value.trim();
+    const result = document.getElementById('trackResult');
+    if(!id){ result.classList.remove('visible'); return; }
+ 
+    // deterministic mock status from the id's char sum
+    const sum = [...id].reduce((a,c) => a + c.charCodeAt(0), 0);
+    const states = [
+      {label:'Under Review', cls:'review', steps:['Submitted','Received by registry','Under review']},
+      {label:'Pending Documents', cls:'pending', steps:['Submitted','Received by registry','Awaiting documents']},
+      {label:'Approved', cls:'approved', steps:['Submitted','Received by registry','Under review','Approved']},
+    ];
+    const chosen = states[sum % states.length];
+
+    result.innerHTML = `
+      <div class="status-badge ${chosen.cls}">${chosen.label}</div>
+      <div class="review-row"><span class="k">Reference ID</span><span class="mono">${id}</span></div>
+      <div class="review-row"><span class="k">Applicant</span><span>On file</span></div>
+      <div class="track-timeline">
+        ${chosen.steps.map((s,i) => `
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div><div>${s}</div><div class="tl-date">Step ${i+1} of ${chosen.steps.length}</div></div>
+          </div>`).join('')}
+      </div>`;
+    result.classList.add('visible');
+  });
+  const notices = [
+    {date:'Aug 24, 2026', title:'Horizon STEM Fellowship — deadline extended by 7 days', tag:'urgent'},
+    {date:'Aug 20, 2026', title:'Portal maintenance scheduled for Sept 2, 12am–4am', tag:'gold'},
+    {date:'Aug 15, 2026', title:'New scholarship added: Emerging Voices Writing Fund', tag:'gold'},
+    {date:'Aug 10, 2026', title:'Clara Voss Arts Grant — document resubmission window open', tag:'urgent'},
+    {date:'Aug 02, 2026', title:'Founders\' Business Award results announced', tag:'gold'},
+  ];
+  document.getElementById('noticeList').innerHTML = notices.map(n => `
+    <div class="notice-row">
+      <div class="ndate">${n.date}</div>
+      <div class="ntitle">${n.title}</div>
+      <div><span class="stamp ${n.tag==='gold'?'gold':''}">${n.tag==='urgent'?'Action needed':'Update'}</span></div>
+    </div>`).join('');
+</script>
+</body>
+</html>
