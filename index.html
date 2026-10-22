@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ledger — Scholarship Portal</title>
+<title>Scholarship Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -314,8 +314,6 @@
       </div>
     </div>
   </section>
- 
-  <!-- REGISTER -->
   <section class="page" id="page-register">
     <div class="wrap auth-shell">
       <div class="auth-card">
@@ -344,8 +342,6 @@
       </div>
     </div>
   </section>
- 
-  <!-- APPLY (multi-step) -->
   <section class="page" id="page-apply">
     <div class="wrap">
       <span class="eyebrow">New Application</span>
@@ -444,7 +440,7 @@
         </div>
  
         <div class="step-actions">
-          <button type="button" class="btn btn-ghost" id="prevStepBtn" disabled>← Back</button>
+          <button type="button" onclick="goBack()">← Back</button>
           <button type="button" class="btn btn-primary" id="nextStepBtn">Continue →</button>
           <button type="submit" class="btn btn-primary" id="submitAppBtn" style="display:none;">Submit application</button>
         </div>
@@ -483,8 +479,6 @@
 </footer>
  
 <script>
-  /* ---------------- Router ---------------- */
-
 const images = [
     "https://www.euroschoolindia.com/blogs/wp-content/uploads/2023/06/types-of-scholarship-for-students.jpg",
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2IG7ldVLNT6xUcbNcPLh2kgh6-Nalrqka1012-0_RqZ0W65B9jnRjM3M&s=10",
@@ -540,8 +534,6 @@ function prevSlide() {
     });
     document.getElementById('crumbCurrent').textContent = crumbLabels[name];
     window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
- 
-    // nav actions reflect mock auth state
     document.getElementById('navActions').style.display = (name==='login'||name==='register') ? 'none' : 'flex';
   }
  
@@ -551,8 +543,6 @@ function prevSlide() {
   });
   window.addEventListener('hashchange', render);
   render();
- 
-  /* ---------------- Login form ---------------- */
   const loginForm = document.getElementById('loginForm');
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -572,36 +562,71 @@ function prevSlide() {
       status.classList.remove('ok'); status.style.display='block';
     }
   });
- 
-  /* ---------------- Register form ---------------- */
   const registerForm = document.getElementById('registerForm');
-  registerForm.addEventListener('submit', (e) => {
+  registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
-    const pass = document.getElementById('regPassword').value;
+    const password = document.getElementById('regPassword').value;
+
     const nameOk = name.length >= 2;
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const passOk = pass.length >= 6;
+    const passOk = password.length >= 6;
+
     toggleInvalid('regName', !nameOk);
     toggleInvalid('regEmail', !emailOk);
     toggleInvalid('regPassword', !passOk);
+
     const status = document.getElementById('registerStatus');
-    if(nameOk && emailOk && passOk){
-      status.textContent = '✓ Account created — please log in to continue.';
-      status.classList.add('ok'); status.style.display='block';
-      setTimeout(()=>navigate('login'), 700);
-    } else {
-      status.textContent = 'Please fix the highlighted fields.';
-      status.classList.remove('ok'); status.style.display='block';
+
+    if (!nameOk || !emailOk || !passOk) {
+        status.textContent = 'Please fix the highlighted fields.';
+        status.classList.remove('ok');
+        status.style.display = 'block';
+        return;
     }
-  });
+
+    try {
+        const response = await fetch('http://localhost:5000/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            status.textContent = '✓ Account created successfully!';
+            status.classList.add('ok');
+            status.style.display = 'block';
+
+            setTimeout(() => navigate('login'), 1000);
+        } else {
+            status.textContent = data.message;
+            status.classList.remove('ok');
+            status.style.display = 'block';
+        }
+
+    } catch (error) {
+        status.textContent = 'Cannot connect to backend.';
+        status.classList.remove('ok');
+        status.style.display = 'block';
+
+        console.error(error);
+    }
+});
  
   function toggleInvalid(id, invalid){
     document.querySelector(`[data-field="${id}"]`).classList.toggle('invalid', invalid);
   }
  
-  /* ---------------- Multi-step application ---------------- */
   let currentStep = 1;
   const totalSteps = 4;
   const stepFields = {
@@ -671,15 +696,13 @@ function prevSlide() {
     status.textContent = `✓ Application submitted. Your reference ID is ${refId} — save it to track status.`;
     status.style.display = 'block';
   });
- 
-  /* ---------------- Track status ---------------- */
+
   document.getElementById('trackForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('trackId').value.trim();
     const result = document.getElementById('trackResult');
     if(!id){ result.classList.remove('visible'); return; }
  
-    // deterministic mock status from the id's char sum
     const sum = [...id].reduce((a,c) => a + c.charCodeAt(0), 0);
     const states = [
       {label:'Under Review', cls:'review', steps:['Submitted','Received by registry','Under review']},
@@ -714,6 +737,9 @@ function prevSlide() {
       <div class="ntitle">${n.title}</div>
       <div><span class="stamp ${n.tag==='gold'?'gold':''}">${n.tag==='urgent'?'Action needed':'Update'}</span></div>
     </div>`).join('');
+    function goBack() {
+    window.history.back();
+}
 </script>
 </body>
 </html>
