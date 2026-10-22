@@ -232,9 +232,6 @@
          src="https://www.euroschoolindia.com/blogs/wp-content/uploads/2023/06/types-of-scholarship-for-students.jpg"
          alt="Scholarship">
 
-    <button class="prev" onclick="prevSlide()">❮</button>
-    <button class="next" onclick="nextSlide()">❯</button>
-
     <div class="slider-dots">
         <span onclick="showSlide(0)">●</span>
         <span onclick="showSlide(1)">●</span>
@@ -513,6 +510,8 @@ function prevSlide() {
 
     showSlide(currentSlide);
 }
+
+setInterval(nextSlide, 5000);
 
   const pages = ['home','login','register','apply','track','notices'];
   const crumbLabels = {home:'Home',login:'Log in',register:'Register',apply:'New Application',track:'Track Status',notices:'Notices'};
