@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
@@ -58,9 +59,9 @@ app.post("/api/register", async (req, res) => {
     );
 });
 
-// Test
+// Display the frontend
 app.get("/", (req, res) => {
-    res.send("EDUBRIDGE Backend is Running!");
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Start server
